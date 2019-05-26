@@ -4,6 +4,9 @@
 #include <LiquidCrystal.h>
 #include <Time.h>
 
+#include "Pitches.h"
+
+
 // --- Custom types ---
 typedef unsigned char uchr;
 typedef unsigned int uint;
@@ -42,6 +45,64 @@ const char kLoveMessage[16] = "LOVE you ALL <3";
 const uchr kZero = 48;
 
 
+//Mario main theme melody
+int melody[] = {
+  NOTE_E7, NOTE_E7, 0, NOTE_E7,
+  0, NOTE_C7, NOTE_E7, 0,
+  NOTE_G7, 0, 0,  0,
+  NOTE_G6, 0, 0, 0,
+ 
+  NOTE_C7, 0, 0, NOTE_G6,
+  0, 0, NOTE_E6, 0,
+  0, NOTE_A6, 0, NOTE_B6,
+  0, NOTE_AS6, NOTE_A6, 0,
+ 
+  NOTE_G6, NOTE_E7, NOTE_G7,
+  NOTE_A7, 0, NOTE_F7, NOTE_G7,
+  0, NOTE_E7, 0, NOTE_C7,
+  NOTE_D7, NOTE_B6, 0, 0,
+ 
+  NOTE_C7, 0, 0, NOTE_G6,
+  0, 0, NOTE_E6, 0,
+  0, NOTE_A6, 0, NOTE_B6,
+  0, NOTE_AS6, NOTE_A6, 0,
+ 
+  NOTE_G6, NOTE_E7, NOTE_G7,
+  NOTE_A7, 0, NOTE_F7, NOTE_G7,
+  0, NOTE_E7, 0, NOTE_C7,
+  NOTE_D7, NOTE_B6, 0, 0
+};
+//Mario main them tempo
+int noteDurations[] = {
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+ 
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+ 
+  9, 9, 9,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+ 
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+ 
+  9, 9, 9,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+};
+
+bool not_playing_ = true;
+
+
 // Setup 
 LiquidCrystal lcd(kRSPin, kEnablePin,kD4Pin ,kD5Pin, kD6Pin, kD7Pin);
 
@@ -54,17 +115,44 @@ void setup() {
 #ifdef DEBUG_VERBOSE  
   Serial.println("Hello Computer");
 #endif
-  reading_time_ = true;
   
+  reading_time_ = true;
+  not_playing_ = true;
 
 }
 
 void loop() {
   ReadStartingTime();
+
+  int key = analogRead(A0);
+  Serial.println(key);
   
   lcd.setCursor(0,1);
   sprintf(time_format_, "Time %02d:%02d:%02d", hour(), minute(), second());
   lcd.print(time_format_);
+
+
+  // TODO: Custom Queue implementation
+  if (not_playing_ && key > 500) {
+    not_playing_ = false;
+    int size = sizeof(melody) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+
+      // to calculate the note duration, take one second divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / noteDurations[thisNote];
+      tone(8, melody[thisNote], noteDuration);
+  
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      // stop the tone playing:
+      noTone(8);
+    }  
+    not_playing_ = true;
+  }
+  
 }
 
 
