@@ -5,6 +5,7 @@
 #include <Time.h>
 
 #include "Pitches.h"
+#include "WakeUpSong.h"
 
 
 // --- Custom types ---
@@ -45,61 +46,6 @@ const char kLoveMessage[16] = "LOVE you ALL <3";
 const uchr kZero = 48;
 
 
-//Mario main theme melody
-int melody[] = {
-  NOTE_E7, NOTE_E7, 0, NOTE_E7,
-  0, NOTE_C7, NOTE_E7, 0,
-  NOTE_G7, 0, 0,  0,
-  NOTE_G6, 0, 0, 0,
- 
-  NOTE_C7, 0, 0, NOTE_G6,
-  0, 0, NOTE_E6, 0,
-  0, NOTE_A6, 0, NOTE_B6,
-  0, NOTE_AS6, NOTE_A6, 0,
- 
-  NOTE_G6, NOTE_E7, NOTE_G7,
-  NOTE_A7, 0, NOTE_F7, NOTE_G7,
-  0, NOTE_E7, 0, NOTE_C7,
-  NOTE_D7, NOTE_B6, 0, 0,
- 
-  NOTE_C7, 0, 0, NOTE_G6,
-  0, 0, NOTE_E6, 0,
-  0, NOTE_A6, 0, NOTE_B6,
-  0, NOTE_AS6, NOTE_A6, 0,
- 
-  NOTE_G6, NOTE_E7, NOTE_G7,
-  NOTE_A7, 0, NOTE_F7, NOTE_G7,
-  0, NOTE_E7, 0, NOTE_C7,
-  NOTE_D7, NOTE_B6, 0, 0
-};
-//Mario main them tempo
-int noteDurations[] = {
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
- 
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
- 
-  9, 9, 9,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
- 
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
- 
-  9, 9, 9,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-  12, 12, 12, 12,
-};
-
 bool not_playing_ = true;
 
 
@@ -124,16 +70,26 @@ void setup() {
 void loop() {
   ReadStartingTime();
 
-  int key = analogRead(A0);
-  Serial.println(key);
+  int start_key = analogRead(A0);
+  int stop_key = analogRead(A1);
+#ifdef DEBUG_VERBOSE  
+  Serial.println("First key");
+  Serial.println(start_key);
+  Serial.println("Second key");
+  Serial.println(stop_key);
+#endif
   
   lcd.setCursor(0,1);
   sprintf(time_format_, "Time %02d:%02d:%02d", hour(), minute(), second());
   lcd.print(time_format_);
 
 
+  if (stop_key > 500) {
+    setTime(7,45,5,kDay,kMonth,kYear);
+  }
+
   // TODO: Custom Queue implementation
-  if (not_playing_ && key > 500) {
+  if (not_playing_ && start_key > 500) {
     not_playing_ = false;
     int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
