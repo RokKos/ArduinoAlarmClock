@@ -2,6 +2,9 @@
  * Public Constants
  *************************************************/
 
+#ifndef Pitches_h
+#define Pitches_h
+
 typedef unsigned short ushrt;
 
 ushrt NOTE_B0  = 31;
@@ -93,3 +96,5 @@ ushrt NOTE_C8  = 4186;
 ushrt NOTE_CS8 = 4435;
 ushrt NOTE_D8  = 4699;
 ushrt NOTE_DS8 = 4978;
+
+#endif

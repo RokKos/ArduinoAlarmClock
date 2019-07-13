@@ -38,6 +38,22 @@ uchr hours_ = 0;
 uchr minutes_ = 0;
 uchr seconds_ = 0;
 
+const uchr kTimeToWakeUpHours = 7;
+const uchr kTimeToWakeUpMinutes = 45;
+const uchr kTimeToWakeUpSeconds = 5;
+
+struct RemaningTime {
+  uchr hours;
+  uchr minutes;
+  uchr seconds;
+
+  RemaningTime(uchr _hours, uchr _minutes, uchr _seconds) {
+    hours = _hours;
+    minutes = _minutes;
+    seconds = _seconds;
+  }
+};
+
 // -- Serial -- 
 const uint kPortNumber = 9600;
 
@@ -80,12 +96,14 @@ void loop() {
 #endif
   
   lcd.setCursor(0,1);
-  sprintf(time_format_, "Time %02d:%02d:%02d", hour(), minute(), second());
+
+  RemaningTime rt = CalculateRemaningTime();
+  sprintf(time_format_, "Time %02d:%02d:%02d", rt.hours, rt.minutes, rt.seconds);
   lcd.print(time_format_);
 
 
   if (stop_key > 500) {
-    setTime(7,45,5,kDay,kMonth,kYear);
+    setTime(0,0,0,kDay,kMonth,kYear);
   }
 
   // TODO: Custom Queue implementation
@@ -161,4 +179,26 @@ void ParseTimeRecieved(uchr inc_byte) {
     }
     
     time_bit_recived_++;
+}
+
+
+RemaningTime CalculateRemaningTime() {
+  int remaning_seconds = kTimeToWakeUpSeconds - second();
+  int remaning_minutes = 0;
+  
+  if (remaning_seconds < 0) {
+    remaning_minutes = -1;
+    remaning_seconds = 60 + remaning_seconds;
+  }
+
+  remaning_minutes += kTimeToWakeUpMinutes - minute();
+  int remaning_hours = 0;
+  if (remaning_minutes < 0) {
+    remaning_hours = -1;
+    remaning_minutes = 60 + remaning_minutes;
+  }
+
+  remaning_hours += kTimeToWakeUpHours - hour();
+
+  return RemaningTime(remaning_hours, remaning_minutes, remaning_seconds);
 }

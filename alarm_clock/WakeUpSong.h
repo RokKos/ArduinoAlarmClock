@@ -1,3 +1,6 @@
+#ifndef WakeUpSong_h
+#define WakeUpSong_h
+
 //Mario main theme melody
 const ushrt melody[] = {
   NOTE_E7, NOTE_E7, 0, NOTE_E7,
@@ -53,3 +56,5 @@ const unsigned char noteDurations[] = {
   12, 12, 12, 12,
   12, 12, 12, 12,
 };
+
+#endif
